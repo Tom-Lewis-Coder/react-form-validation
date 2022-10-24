@@ -1,18 +1,23 @@
-import { useRef, useState, useEffect, useContext } from 'react'
-import AuthContext from './context/AuthProvider'
+import { useRef, useState, useEffect } from 'react'
+import useAuth from '../hooks/useAuth'
+import { Link, useNavigate, useLocation } from 'react-router-dom' 
 
-import axios from './api/axios'
+import axios from '../api/axios'
 const LOGIN_URL = '/auth'
 
 const Login = () => {
-    const { setAuth } = useContext(AuthContext)
+    const { setAuth } = useAuth()
+
+    const navigate = useNavigate()
+    const location = useLocation()
+    const from = location.state?.from?.pathname || '/'
+
     const userRef = useRef()
     const errRef = useRef()
 
     const [ user, setUser ] = useState('')
     const [ pwd, setPwd ] = useState('')
     const [ errMsg, setErrMsg ] = useState('')
-    const [ success, setSuccess ] = useState(false)
 
     useEffect(() => {
         userRef.current.focus()
@@ -40,11 +45,10 @@ const Login = () => {
             setAuth({ user, pwd, roles, accessToken })
             setUser('')
             setPwd('')
-            setSuccess(true)
+            navigate(from, { replace: true})
         } catch (err) {
             if (!err?.response) {
                 setErrMsg('No server response')
-                console.log(success)
             } else if (err.response?.status === 400) {
                 setErrMsg('Missing username or password')
             } else if (err.response?.status === 401) {
@@ -57,16 +61,6 @@ const Login = () => {
     }
 
   return (
-    <>
-        {success ? (
-            <section>
-                <h1>You are logged in!</h1>
-                <br />
-                <p>
-                    <a href='#'>Go to home</a>
-                </p>
-            </section>
-        ) : (
     <section>
         <p ref={errRef} className={errMsg ? 'errmsg' : 'offscreen'} aria-live='assertive'>{errMsg}</p>
         <h1>Sign In</h1>
@@ -98,9 +92,7 @@ const Login = () => {
                 <a href='#'>Sign Up</a>
             </span>
         </p>
-    </section>
-    )}
-    </>   
+    </section> 
   )
 }
 

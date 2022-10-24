@@ -1,13 +1,55 @@
-import React from 'react'
-import Register from './Register.js'
-import Login from './Login.js'
+import Register from './components/Register'
+import Login from './components/Login'
+import Home from './components/Home'
+import Layout from './components/Layout'
+import Editor from './components/Editor'
+import Admin from './components/Admin'
+import Missing from './components/Missing'
+import Unauthorised from './components/Unauthorised'
+import Lounge from './components/Lounge'
+import LinkPage from './components/LinkPage'
+import RequireAuth from './components/RequireAuth'
+import { Routes, Route } from 'react-router-dom'
+
+const ROLES = {
+  'User': 2001,
+  'Editor': 1984,
+  'Admin' :5150
+}
 
 const App = () => {
   return (
-    <main className='App'>
-        {/* <Register /> */}
-        <Login />
-    </main>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+
+      {/*Public Routes*/}
+      <Route path="login" element={<Login />} />
+      <Route path="register" element={<Register />} />
+      <Route path="linkpage" element={<LinkPage />} />
+      <Route path="unauthorised" element={<Unauthorised />} />
+
+      {/*Protected Routes*/}
+      <Route element={<RequireAuth allowedRoles={[ROLES.User]}/>} >
+        <Route path="/" element={<Home />} />
+      </Route>
+
+      <Route element={<RequireAuth allowedRoles={[ROLES.Editor]}/>} >
+        <Route path="editor" element={<Editor />} />
+      </Route>
+
+      <Route element={<RequireAuth allowedRoles={[ROLES.Admin]}/>} >
+        <Route path="admin" element={<Admin />} />
+      </Route>
+
+      <Route element={<RequireAuth allowedRoles={[ROLES.Editor, ROLES.Admin]}/>} >
+        <Route path="lounge" element={<Lounge />} />
+      </Route>
+
+      {/*Catch all*/}
+      <Route path="*" element={<Missing />} />
+
+      </Route>
+    </Routes>
   )
 }
 
